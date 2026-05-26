@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SAMPARK Phone Voice</title>
+  <style>
+    :root {
+      --bg: #f3f7fb;
+      --panel: #ffffff;
+      --text: #162033;
+      --muted: #65758b;
+      --line: #d7e2ee;
+      --primary: #1d5fd7;
+      --accent: #0d9488;
+      --danger: #c7364a;
+      --navy: #10243e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 22px 18px;
+      background: var(--navy);
+      color: #ffffff;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: #c9d6e5;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      font: inherit;
+    }
+
+    button {
+      width: 100%;
+      min-height: 56px;
+      border: 0;
+      border-radius: 8px;
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .start {
+      background: var(--accent);
+      min-height: 78px;
+      font-size: 22px;
+    }
+
+    .stop {
+      background: var(--primary);
+    }
+
+    .emergency {
+      background: var(--danger);
+      min-height: 70px;
+    }
+
+    .secondary {
+      color: var(--primary);
+      background: #ffffff;
+      border: 1px solid var(--line);
+      min-height: 42px;
+      font-size: 14px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message {
+      min-height: 96px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SAMPARK Voice</h1>
+    <p class="subtitle">Tap start, speak naturally, and hear the assistant reply.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <label for="backendUrl">Backend URL</label>
+      <input id="backendUrl" type="text" placeholder="http://192.168.1.5:5000">
+      <div class="row">
+        <button type="button" class="secondary" onclick="saveBackendUrl()">Save</button>
+        <button type="button" class="secondary" onclick="testBackend()">Test</button>
+      </div>
+      <p class="status" id="connectionStatus">Set this to your laptop backend URL.</p>
+    </section>
+
+    <section class="panel controls">
+      <button type="button" class="start" onclick="startConversation()" id="startButton">Start Conversation</button>
+      <button type="button" class="stop" onclick="stopConversation()" id="stopButton">Stop</button>
+      <button type="button" class="emergency" onclick="sendEmergencyOnce()">Emergency Alert</button>
+    </section>
+
+    <section class="panel">
+      <label>Last message</label>
+      <div class="message" id="lastMessage">Waiting to start.</div>
+    </section>
+  </main>
+
+  <script>
+    const defaultBackendUrl = localStorage.getItem("samparkPhoneBackendUrl") || "http://127.0.0.1:5000";
+    const backendInput = document.getElementById("backendUrl");
+    backendInput.value = defaultBackendUrl;
+
+    let recognizer = null;
+    let conversationActive = false;
+    let emergencySending = false;
+    const sessionId = localStorage.getItem("samparkWebVoiceSession") || crypto.randomUUID();
+    localStorage.setItem("samparkWebVoiceSession", sessionId);
+
+    function backendUrl() {
+      return backendInput.value.trim().replace(/\/$/, "");
+    }
+
+    function saveBackendUrl() {
+      localStorage.setItem("samparkPhoneBackendUrl", backendUrl());
+      setStatus("Backend URL saved.");
+    }
+
+    function setStatus(text) {
+      document.getElementById("connectionStatus").textContent = text;
+    }
+
+    function setMessage(text) {
+      document.getElementById("lastMessage").textContent = text;
+    }
+
+    function speak(text) {
+      setMessage(text);
+      if ("speechSynthesis" in window) {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        speechSynthesis.speak(utterance);
+      }
+    }
+
+    async function testBackend() {
+      try {
+        const response = await fetch(`${backendUrl()}/`);
+        if (!response.ok) {
+          throw new Error("Backend did not respond correctly.");
+        }
+        setStatus("Backend connected.");
+      } catch (error) {
+        setStatus(`Backend failed: ${error.message}`);
+      }
+    }
+
+    function startConversation() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        speak("Speech recognition is not supported. Use Chrome on Android for phone voice.");
+        return;
+      }
+
+      conversationActive = true;
+      recognizer = new SpeechRecognition();
+      recognizer.lang = "en-IN";
+      recognizer.interimResults = false;
+      recognizer.continuous = false;
+
+      recognizer.onstart = () => {
+        setMessage("Listening...");
+        document.getElementById("startButton").textContent = "Listening...";
+      };
+
+      recognizer.onspeechstart = () => {
+        setMessage("Voice detected. Keep speaking...");
+      };
+
+      recognizer.onresult = (event) => {
+        const message = event.results[0][0].transcript;
+        processMessage(message);
+      };
+
+      recognizer.onerror = (event) => {
+        if (conversationActive) {
+          speak(recognitionErrorMessage(event.error));
+        }
+      };
+
+      recognizer.onend = () => {
+        document.getElementById("startButton").textContent = "Start Conversation";
+        conversationActive = false;
+      };
+
+      recognizer.start();
+    }
+
+    function recognitionErrorMessage(errorCode) {
+      if (errorCode === "no-speech") {
+        return "No speech was detected. Please hold the phone closer, press start, and speak clearly.";
+      }
+      if (errorCode === "audio-capture") {
+        return "Microphone was not found. Please check your phone microphone.";
+      }
+      if (errorCode === "not-allowed") {
+        return "Microphone permission is blocked. Please allow microphone access in Chrome settings.";
+      }
+      if (errorCode === "network") {
+        return "Speech recognition needs internet. Please check your connection and try again.";
+      }
+      if (errorCode === "service-not-allowed") {
+        return "This browser is blocking speech recognition. Please try Chrome on Android.";
+      }
+      return "I could not hear clearly. Please press start and try again.";
+    }
+
+    function stopConversation() {
+      conversationActive = false;
+      if (recognizer) {
+        recognizer.stop();
+      }
+      if ("speechSynthesis" in window) {
+        speechSynthesis.cancel();
+      }
+      setMessage("Conversation stopped.");
+      document.getElementById("startButton").textContent = "Start Conversation";
+    }
+
+    async function processMessage(message) {
+      setMessage(`You said: ${message}`);
+
+      try {
+        const response = await fetch(`${backendUrl()}/assistant-message`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            message,
+            session_id: sessionId,
+            source: "web_voice"
+          })
+        });
+        const result = await response.json();
+        speak(result.reply || "I heard you.");
+      } catch (error) {
+        speak("Could not connect to backend. Please check the backend URL.");
+      }
+    }
+
+    async function sendEmergencyOnce(message = "Emergency button pressed") {
+      if (emergencySending) {
+        return;
+      }
+
+      emergencySending = true;
+      stopConversation();
+      setMessage("Sending emergency alert...");
+
+      try {
+        const response = await fetch(`${backendUrl()}/assistant-message`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            message,
+            session_id: sessionId,
+            source: "web_voice"
+          })
+        });
+        const result = await response.json();
+        speak(result.reply || "Emergency detected. Alert created.");
+      } catch (error) {
+        speak("Emergency detected, but backend is not reachable. Please call your caretaker now.");
+      } finally {
+        emergencySending = false;
+      }
+    }
+  </script>
+</body>
+</html>

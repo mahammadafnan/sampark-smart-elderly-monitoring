@@ -1,0 +1,6 @@
+requests==2.32.3
+SpeechRecognition==3.10.4
+pyttsx3==2.90
+PyAudio==0.2.14
+openai==1.93.0
+google-genai==1.49.0

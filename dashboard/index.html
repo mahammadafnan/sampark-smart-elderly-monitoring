@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SAMPARK Care Dashboard</title>
+  <style>
+    :root {
+      --bg: #f3f7fb;
+      --panel: #ffffff;
+      --panel-soft: #f7fafc;
+      --text: #162033;
+      --muted: #65758b;
+      --line: #d7e2ee;
+      --primary: #1d5fd7;
+      --primary-dark: #143f91;
+      --accent: #0d9488;
+      --accent-soft: #d9f5f1;
+      --low: #16834a;
+      --medium: #b86a00;
+      --high: #c7364a;
+      --navy: #10243e;
+      --shadow: 0 18px 45px rgba(16, 36, 62, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Inter, Arial, sans-serif;
+      background: linear-gradient(180deg, #e8f1fb 0%, #f8fbfd 34%, #eef4f8 100%);
+      color: var(--text);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    header {
+      background: var(--navy);
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .topbar {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: #c9d6e5;
+      font-size: 14px;
+    }
+
+    .status-pill {
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #e7edf7;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--medium);
+    }
+
+    .dot.online {
+      background: var(--low);
+    }
+
+    .dot.offline {
+      background: var(--high);
+    }
+
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .patient {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #dbeafe;
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 22px;
+    }
+
+    .patient h2 {
+      margin: 0 0 4px;
+      font-size: 20px;
+    }
+
+    .patient p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 8px 25px rgba(16, 36, 62, 0.07);
+    }
+
+    .tab-button {
+      background: transparent;
+      color: var(--muted);
+      border-color: transparent;
+      font-weight: 800;
+    }
+
+    .tab-button.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 8px 18px rgba(29, 95, 215, 0.22);
+    }
+
+    button {
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      background: var(--primary);
+      color: #ffffff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(29, 95, 215, 0.18);
+    }
+
+    button.secondary {
+      background: #ffffff;
+      color: var(--primary-dark);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .profile-card {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 18px;
+      border-top: 6px solid var(--accent);
+      animation: fadeIn 240ms ease both;
+    }
+
+    .profile-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .profile-name {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .profile-title h2 {
+      margin: 0 0 4px;
+      font-size: 22px;
+    }
+
+    .profile-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .care-tag {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #075985;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .profile-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--panel-soft);
+      min-height: 76px;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .profile-item:hover {
+      transform: translateY(-2px);
+      border-color: #b7c8dd;
+    }
+
+    .profile-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 7px;
+    }
+
+    .profile-value {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font: inherit;
+      color: var(--text);
+      background: #ffffff;
+    }
+
+    .field textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .edit-panel {
+      display: none;
+      animation: fadeIn 220ms ease both;
+    }
+
+    .edit-panel.active {
+      display: block;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      animation: fadeIn 240ms ease both;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+
+    .risk-panel {
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+      border-top: 6px solid var(--low);
+      background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .risk-panel.Medium {
+      border-top-color: var(--medium);
+    }
+
+    .risk-panel.High {
+      border-top-color: var(--high);
+    }
+
+    .risk-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .risk-label {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .risk-value {
+      margin-top: 4px;
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .risk-value.Low {
+      color: var(--low);
+    }
+
+    .risk-value.Medium {
+      color: var(--medium);
+    }
+
+    .risk-value.High {
+      color: var(--high);
+    }
+
+    .score-circle {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 8px solid #dbeafe;
+      color: var(--primary-dark);
+      font-weight: 900;
+      font-size: 26px;
+      background: #ffffff;
+    }
+
+    .risk-message {
+      padding: 14px;
+      border-radius: 8px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .risk-message.Low {
+      color: var(--low);
+      background: #eaf8ef;
+    }
+
+    .risk-message.Medium {
+      color: var(--medium);
+      background: #fff6df;
+    }
+
+    .risk-message.High {
+      color: var(--high);
+      background: #ffeaea;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .metric {
+      min-height: 104px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .metric:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 22px rgba(16, 36, 62, 0.08);
+    }
+
+    .metric.clickable {
+      cursor: pointer;
+      border-color: #b7d4ff;
+    }
+
+    .metric.clickable:hover {
+      border-color: var(--primary);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .metric-value {
+      font-size: 26px;
+      line-height: 1.1;
+      font-weight: 900;
+      color: var(--navy);
+    }
+
+    .metric-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .alert-list {
+      display: grid;
+      gap: 10px;
+      max-height: 560px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .alert-item {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--medium);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #ffffff;
+      transition: transform 160ms ease;
+    }
+
+    .alert-item:hover {
+      transform: translateX(2px);
+    }
+
+    .alert-item.High {
+      border-left-color: var(--high);
+      background: #fff8f8;
+    }
+
+    .alert-item.Medium {
+      border-left-color: var(--medium);
+    }
+
+    .alert-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .alert-meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .wide {
+      margin-top: 18px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .history-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: #ffffff;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 800;
+      background: #f8fafc;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 14px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .profile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .history-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .topbar,
+      main {
+        padding: 16px;
+      }
+
+      .topbar,
+      .toolbar,
+      .risk-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-circle {
+        width: 78px;
+        height: 78px;
+        font-size: 22px;
+      }
+
+      .risk-value {
+        font-size: 34px;
+      }
+
+      .profile-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <h1>SAMPARK Care Dashboard</h1>
+          <p class="subtitle">Elderly health monitoring, caregiver alerts, and risk prediction</p>
+        </div>
+      </div>
+      <div class="status-pill">
+        <span class="dot" id="connectionDot"></span>
+        <span id="status">Backend: http://127.0.0.1:5000</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="nav-tabs">
+      <button type="button" class="tab-button active" id="overviewTab" onclick="showPage('overview')">Overview</button>
+      <button type="button" class="tab-button" id="profileTab" onclick="showPage('profile')">Patient Profile</button>
+      <button type="button" class="tab-button" id="medsTab" onclick="showPage('meds')">Meds History</button>
+      <button type="button" class="tab-button" id="mealsTab" onclick="showPage('meals')">Meals History</button>
+      <button type="button" class="tab-button" id="recordsTab" onclick="showPage('records')">Saved Records</button>
+    </nav>
+
+    <div class="toolbar">
+      <div class="patient">
+        <div class="avatar">EU</div>
+        <div>
+          <h2>Elderly User</h2>
+          <p id="lastUpdated">Waiting for latest health update</p>
+        </div>
+      </div>
+      <div class="actions">
+        <span class="status" id="autoRefreshLabel">Auto-refresh: 5s</span>
+        <button type="button" class="secondary" onclick="toggleAutoRefresh()" id="autoRefreshButton">Pause Auto</button>
+        <button type="button" onclick="loadDashboard()">Refresh</button>
+      </div>
+    </div>
+
+    <section class="page active" id="overviewPage">
+      <section class="layout">
+        <div>
+          <section class="panel risk-panel" id="riskPanel"></section>
+          <section class="metric-grid" id="metrics"></section>
+        </div>
+
+        <aside class="panel">
+          <h2>Caregiver Alerts</h2>
+          <div id="alerts"></div>
+        </aside>
+      </section>
+    </section>
+
+    <section class="page" id="profilePage">
+      <section class="panel profile-card">
+        <div class="profile-head">
+          <div class="profile-name">
+            <div class="avatar" id="profileInitials">EU</div>
+            <div class="profile-title">
+              <h2 id="profileName">Elderly User</h2>
+              <p id="profileSummary">Profile details</p>
+            </div>
+          </div>
+          <div class="care-tag" id="careTag">Routine Monitoring</div>
+        </div>
+        <div class="profile-grid" id="profileGrid"></div>
+        <div class="form-actions">
+          <button type="button" onclick="showProfileEditor()">Edit Profile</button>
+        </div>
+      </section>
+
+      <section class="panel edit-panel" id="profileEditPanel">
+        <h2>Edit Patient Profile</h2>
+        <form id="profileForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="profileInputName">Name</label>
+              <input id="profileInputName" name="name" type="text">
+            </div>
+            <div class="field">
+              <label for="profileInputAge">Age</label>
+              <input id="profileInputAge" name="age" type="number" min="1">
+            </div>
+            <div class="field">
+              <label for="profileInputGender">Gender</label>
+              <select id="profileInputGender" name="gender">
+                <option>Female</option>
+                <option>Male</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="profileInputHeight">Height</label>
+              <input id="profileInputHeight" name="height" type="text">
+            </div>
+            <div class="field">
+              <label for="profileInputWeight">Weight</label>
+              <input id="profileInputWeight" name="weight" type="text">
+            </div>
+            <div class="field">
+              <label for="profileInputBloodGroup">Blood Group</label>
+              <input id="profileInputBloodGroup" name="bloodGroup" type="text">
+            </div>
+            <div class="field">
+              <label for="profileInputCaretaker">Caretaker</label>
+              <input id="profileInputCaretaker" name="caretaker" type="text">
+            </div>
+            <div class="field">
+              <label for="profileInputEmergencyContact">Emergency Contact</label>
+              <input id="profileInputEmergencyContact" name="emergencyContact" type="text">
+            </div>
+            <div class="field">
+              <label for="profileInputAllergies">Allergies</label>
+              <input id="profileInputAllergies" name="allergies" type="text">
+            </div>
+          </div>
+          <div class="field" style="margin-top: 12px;">
+            <label for="profileInputConditions">Known Diseases / Conditions</label>
+            <textarea id="profileInputConditions" name="conditions"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Save Profile</button>
+            <button type="button" class="secondary" onclick="hideProfileEditor()">Cancel</button>
+            <button type="button" class="secondary" onclick="resetProfile()">Reset Default</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section class="page" id="recordsPage">
+      <section class="panel">
+        <h2>Saved Health Records</h2>
+        <div id="records"></div>
+      </section>
+    </section>
+
+    <section class="page" id="medsPage">
+      <section class="panel">
+        <h2>Missed Medicine History</h2>
+        <div id="medsHistory"></div>
+      </section>
+    </section>
+
+    <section class="page" id="mealsPage">
+      <section class="panel">
+        <h2>Missed Meals History</h2>
+        <div id="mealsHistory"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const backendUrl = "http://127.0.0.1:5000";
+    const defaultPatientProfile = {
+      name: "Elderly User",
+      age: 72,
+      gender: "Female",
+      height: "158 cm",
+      weight: "62 kg",
+      bloodGroup: "O+",
+      conditions: "Hypertension, diabetes",
+      allergies: "None reported",
+      caretaker: "Family caretaker",
+      emergencyContact: "+91 98765 43210"
+    };
+    let patientProfile = loadProfile();
+    let autoRefresh = true;
+    let timer = null;
+
+    function metric(label, value, note, targetPage = null) {
+      const clickable = targetPage ? " clickable" : "";
+      const clickHandler = targetPage ? ` onclick="showPage('${targetPage}')"` : "";
+      return `
+        <div class="metric${clickable}"${clickHandler}>
+          <div class="metric-label">${label}</div>
+          <div class="metric-value">${value}</div>
+          <div class="metric-note">${note}</div>
+        </div>
+      `;
+    }
+
+    function reasonsText(reasons) {
+      return reasons && reasons.length ? reasons.join(", ") : "No alert reasons";
+    }
+
+    function detailText(record, type) {
+      const detail = type === "meds" ? record.missed_meds_detail : record.missed_meals_detail;
+      if (detail && String(detail).trim()) {
+        return detail;
+      }
+      return "Not specified";
+    }
+
+    function missedNote(record, type) {
+      const field = type === "meds" ? "missed_meds" : "missed_meals";
+      if (Number(record[field]) <= 0) {
+        return "none reported";
+      }
+      return detailText(record, type);
+    }
+
+    function alertMessage(record) {
+      if (record.risk === "High") {
+        return "High risk detected. Caregiver attention is recommended.";
+      }
+      if (record.risk === "Medium") {
+        return "Medium risk detected. Monitor closely and follow the daily care routine.";
+      }
+      return "Current health status looks stable.";
+    }
+
+    function renderLatest(record) {
+      document.getElementById("lastUpdated").textContent = `Last updated: ${record.created_at}`;
+
+      document.getElementById("metrics").innerHTML = [
+        metric("Heart Rate", `${record.heart_rate} bpm`, "watch / default"),
+        metric("SpO2", `${record.spo2}%`, "oxygen level"),
+        metric("Steps", record.steps, "daily activity"),
+        metric("Sleep", `${record.sleep_hours} hrs`, "last known sleep"),
+        metric("Missed Meds", record.missed_meds, missedNote(record, "meds"), "meds"),
+        metric("Missed Meals", record.missed_meals, missedNote(record, "meals"), "meals"),
+        metric("Risk Score", record.risk_score, "ML + rule score")
+      ].join("");
+
+      const riskPanel = document.getElementById("riskPanel");
+      riskPanel.className = `panel risk-panel ${record.risk}`;
+      riskPanel.innerHTML = `
+        <div class="risk-head">
+          <div>
+            <div class="risk-label">Current Prediction</div>
+            <div class="risk-value ${record.risk}">${record.risk} Risk</div>
+          </div>
+          <div class="score-circle">${record.risk_score}</div>
+        </div>
+        <div class="risk-message ${record.risk}">${alertMessage(record)}</div>
+        <div><strong>Reasons:</strong> ${reasonsText(record.reasons)}</div>
+      `;
+    }
+
+    function renderAlerts(alerts) {
+      if (!alerts.length) {
+        document.getElementById("alerts").innerHTML = "<div class=\"empty\">No caregiver alerts found.</div>";
+        return;
+      }
+
+      const items = alerts.slice(0, 8).map((alert) => `
+        <div class="alert-item ${alert.severity}">
+          <div class="alert-title">
+            <span>${alert.alert_type}</span>
+            <span>${alert.severity}</span>
+          </div>
+          <div>${alert.message}</div>
+          <div class="alert-meta">
+            Record #${alert.health_record_id || "-"} | ${alert.created_at} | Email: ${alert.notification_status || "not_sent"}
+          </div>
+        </div>
+      `).join("");
+
+      document.getElementById("alerts").innerHTML = `<div class="alert-list">${items}</div>`;
+    }
+
+    function renderRecords(records) {
+      if (!records.length) {
+        document.getElementById("records").innerHTML = "<div class=\"empty\">No records found.</div>";
+        return;
+      }
+
+      const rows = records.map((record) => `
+        <tr>
+          <td>${record.id}</td>
+          <td>${record.created_at}</td>
+          <td>${record.risk}</td>
+          <td>${record.risk_score}</td>
+          <td>${record.heart_rate}</td>
+          <td>${record.spo2}</td>
+          <td>${record.steps}</td>
+          <td>${record.sleep_hours}</td>
+          <td>${record.missed_meds}</td>
+          <td>${record.missed_meals}</td>
+          <td>${reasonsText(record.reasons)}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("records").innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Time</th>
+                <th>Risk</th>
+                <th>Score</th>
+                <th>Heart</th>
+                <th>SpO2</th>
+                <th>Steps</th>
+                <th>Sleep</th>
+                <th>Meds</th>
+                <th>Meals</th>
+                <th>Reasons</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderHistory(records, type) {
+      const isMeds = type === "meds";
+      const targetElement = document.getElementById(isMeds ? "medsHistory" : "mealsHistory");
+      const field = isMeds ? "missed_meds" : "missed_meals";
+      const title = isMeds ? "Missed medicine" : "Missed meal";
+      const detailTitle = isMeds ? "Medicine Time" : "Meal";
+      const missedRecords = records.filter((record) => Number(record[field]) > 0);
+      const totalMissed = missedRecords.length;
+      const latestMissed = missedRecords[0] ? missedRecords[0].created_at : "None";
+      const highRiskCount = missedRecords.filter((record) => record.risk === "High").length;
+
+      const summary = `
+        <div class="history-summary">
+          ${metric("Total Incidents", totalMissed, title)}
+          ${metric("Latest Date", latestMissed, "most recent")}
+          ${metric("High Risk Cases", highRiskCount, "from these records")}
+        </div>
+      `;
+
+      if (!missedRecords.length) {
+        targetElement.innerHTML = `${summary}<div class="empty">No ${title.toLowerCase()} records found.</div>`;
+        return;
+      }
+
+      const rows = missedRecords.map((record) => `
+        <tr>
+          <td>${record.created_at}</td>
+          <td>${detailText(record, type)}</td>
+          <td>${record[field]}</td>
+          <td>${record.risk}</td>
+          <td>${record.risk_score}</td>
+          <td>${record.sleep_hours}</td>
+          <td>${record.heart_rate}</td>
+          <td>${record.spo2}</td>
+          <td>${reasonsText(record.reasons)}</td>
+        </tr>
+      `).join("");
+
+      targetElement.innerHTML = `
+        ${summary}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date / Time</th>
+                <th>${detailTitle}</th>
+                <th>${title}</th>
+                <th>Risk</th>
+                <th>Score</th>
+                <th>Sleep</th>
+                <th>Heart</th>
+                <th>SpO2</th>
+                <th>Reasons</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function setConnection(isOnline, text) {
+      const dot = document.getElementById("connectionDot");
+      dot.className = `dot ${isOnline ? "online" : "offline"}`;
+      document.getElementById("status").textContent = text;
+    }
+
+    function initials(name) {
+      return name
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join("");
+    }
+
+    function renderProfile() {
+      document.getElementById("profileInitials").textContent = initials(patientProfile.name);
+      document.getElementById("profileName").textContent = patientProfile.name;
+      document.getElementById("profileSummary").textContent = `${patientProfile.age} yrs | ${patientProfile.gender} | ${patientProfile.conditions}`;
+
+      const items = [
+        ["Age", `${patientProfile.age} years`],
+        ["Gender", patientProfile.gender],
+        ["Height", patientProfile.height],
+        ["Weight", patientProfile.weight],
+        ["Blood Group", patientProfile.bloodGroup],
+        ["Known Conditions", patientProfile.conditions],
+        ["Allergies", patientProfile.allergies],
+        ["Caretaker", patientProfile.caretaker],
+        ["Emergency Contact", patientProfile.emergencyContact]
+      ];
+
+      document.getElementById("profileGrid").innerHTML = items.map(([label, value]) => `
+        <div class="profile-item">
+          <div class="profile-label">${label}</div>
+          <div class="profile-value">${value}</div>
+        </div>
+      `).join("");
+
+      fillProfileForm();
+    }
+
+    function loadProfile() {
+      const savedProfile = localStorage.getItem("samparkPatientProfile");
+      if (!savedProfile) {
+        return { ...defaultPatientProfile };
+      }
+
+      try {
+        return { ...defaultPatientProfile, ...JSON.parse(savedProfile) };
+      } catch (error) {
+        return { ...defaultPatientProfile };
+      }
+    }
+
+    function fillProfileForm() {
+      const form = document.getElementById("profileForm");
+      Object.keys(patientProfile).forEach((key) => {
+        if (form.elements[key]) {
+          form.elements[key].value = patientProfile[key];
+        }
+      });
+    }
+
+    function saveProfile(event) {
+      event.preventDefault();
+      const form = event.target;
+      patientProfile = {
+        name: form.elements.name.value.trim() || defaultPatientProfile.name,
+        age: Number(form.elements.age.value) || defaultPatientProfile.age,
+        gender: form.elements.gender.value,
+        height: form.elements.height.value.trim(),
+        weight: form.elements.weight.value.trim(),
+        bloodGroup: form.elements.bloodGroup.value.trim(),
+        conditions: form.elements.conditions.value.trim(),
+        allergies: form.elements.allergies.value.trim(),
+        caretaker: form.elements.caretaker.value.trim(),
+        emergencyContact: form.elements.emergencyContact.value.trim()
+      };
+      localStorage.setItem("samparkPatientProfile", JSON.stringify(patientProfile));
+      renderProfile();
+      hideProfileEditor();
+    }
+
+    function resetProfile() {
+      localStorage.removeItem("samparkPatientProfile");
+      patientProfile = { ...defaultPatientProfile };
+      renderProfile();
+    }
+
+    function showProfileEditor() {
+      document.getElementById("profileEditPanel").classList.add("active");
+      fillProfileForm();
+    }
+
+    function hideProfileEditor() {
+      document.getElementById("profileEditPanel").classList.remove("active");
+    }
+
+    function showPage(pageName) {
+      document.getElementById("overviewPage").classList.toggle("active", pageName === "overview");
+      document.getElementById("profilePage").classList.toggle("active", pageName === "profile");
+      document.getElementById("medsPage").classList.toggle("active", pageName === "meds");
+      document.getElementById("mealsPage").classList.toggle("active", pageName === "meals");
+      document.getElementById("recordsPage").classList.toggle("active", pageName === "records");
+      document.getElementById("overviewTab").classList.toggle("active", pageName === "overview");
+      document.getElementById("profileTab").classList.toggle("active", pageName === "profile");
+      document.getElementById("medsTab").classList.toggle("active", pageName === "meds");
+      document.getElementById("mealsTab").classList.toggle("active", pageName === "meals");
+      document.getElementById("recordsTab").classList.toggle("active", pageName === "records");
+    }
+
+    async function loadDashboard() {
+      setConnection(false, "Loading backend data...");
+
+      try {
+        const latestResponse = await fetch(`${backendUrl}/health-data/latest`);
+        const recordsResponse = await fetch(`${backendUrl}/health-data`);
+        const alertsResponse = await fetch(`${backendUrl}/alerts`);
+
+        if (!latestResponse.ok) {
+          throw new Error("No health records found yet.");
+        }
+
+        const latest = await latestResponse.json();
+        const recordsData = await recordsResponse.json();
+        const alertsData = await alertsResponse.json();
+
+        renderLatest(latest);
+        renderRecords(recordsData.records || []);
+        renderHistory(recordsData.records || [], "meds");
+        renderHistory(recordsData.records || [], "meals");
+        renderAlerts(alertsData.alerts || []);
+        setConnection(true, `Connected to ${backendUrl}`);
+      } catch (error) {
+        setConnection(false, error.message);
+        document.getElementById("lastUpdated").textContent = "Backend waiting";
+        document.getElementById("metrics").innerHTML = "";
+        document.getElementById("riskPanel").innerHTML = `
+          <div class="risk-label">Dashboard Waiting</div>
+          <div class="risk-message">Start the Flask backend and add health data using the voice assistant.</div>
+        `;
+        document.getElementById("records").innerHTML = "";
+        document.getElementById("medsHistory").innerHTML = "";
+        document.getElementById("mealsHistory").innerHTML = "";
+        document.getElementById("alerts").innerHTML = "";
+      }
+    }
+
+    function scheduleRefresh() {
+      if (timer) {
+        clearInterval(timer);
+      }
+      if (autoRefresh) {
+        timer = setInterval(loadDashboard, 5000);
+      }
+    }
+
+    function toggleAutoRefresh() {
+      autoRefresh = !autoRefresh;
+      document.getElementById("autoRefreshLabel").textContent = autoRefresh ? "Auto-refresh: 5s" : "Auto-refresh: paused";
+      document.getElementById("autoRefreshButton").textContent = autoRefresh ? "Pause Auto" : "Resume Auto";
+      scheduleRefresh();
+    }
+
+    document.getElementById("profileForm").addEventListener("submit", saveProfile);
+    renderProfile();
+    loadDashboard();
+    scheduleRefresh();
+  </script>
+</body>
+</html>

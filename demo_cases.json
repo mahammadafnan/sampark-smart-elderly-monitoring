@@ -1,0 +1,54 @@
+{
+  "low_risk": {
+    "description": "Normal health condition",
+    "voice_sentence": "I walked 5000 steps and slept 7 hours",
+    "api_payload": {
+      "heart_rate": 78,
+      "spo2": 98,
+      "steps": 5000,
+      "sleep_hours": 7,
+      "missed_meds": 0,
+      "missed_meals": 0,
+      "falls": 0
+    }
+  },
+  "medium_risk": {
+    "description": "Poor sleep and missed meal",
+    "voice_sentence": "I slept only 4 hours and I did not eat food in the afternoon",
+    "api_payload": {
+      "heart_rate": 84,
+      "spo2": 97,
+      "steps": 2500,
+      "sleep_hours": 4,
+      "missed_meds": 0,
+      "missed_meals": 1,
+      "falls": 0
+    }
+  },
+  "high_risk": {
+    "description": "Low oxygen, abnormal heart rate, missed medicine",
+    "voice_sentence": "My heart rate is 118 and oxygen level is 92. I missed my medicine",
+    "api_payload": {
+      "heart_rate": 118,
+      "spo2": 92,
+      "steps": 700,
+      "sleep_hours": 4,
+      "missed_meds": 1,
+      "missed_meals": 0,
+      "falls": 0
+    }
+  },
+  "fall_risk": {
+    "description": "Fall reported",
+    "voice_sentence": "I fell down today and skipped food",
+    "api_payload": {
+      "heart_rate": 90,
+      "spo2": 96,
+      "steps": 500,
+      "sleep_hours": 6,
+      "missed_meds": 0,
+      "missed_meals": 1,
+      "falls": 1
+    }
+  }
+}
