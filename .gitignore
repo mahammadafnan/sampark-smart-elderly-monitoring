@@ -1,6 +1,4 @@
-__pycache__/
-*.pyc
 .venv/
-*.db
-*.log
-.streamlit/
+__pycache__/
+.env
+*.pyc
